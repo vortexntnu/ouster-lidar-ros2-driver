@@ -21,6 +21,7 @@
   <depend>pcl_ros</depend>
   <depend>pcl_conversions</depend>
   <depend>std_srvs</depend>
+  <depend>libglfw3-dev</depend>
 
   <build_depend>libjsoncpp-dev</build_depend>
   <build_depend>eigen</build_depend>
