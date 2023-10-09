@@ -20,9 +20,9 @@ jobs:
       fail-fast: false
       matrix:
         ros_distro:
-          - rolling
+          # - rolling
           - humble
-          - iron
+          # - iron
 
     permissions:
       contents: read
@@ -61,6 +61,8 @@ jobs:
         with:
           context: .
           file: Dockerfile
+          build-args: |
+            ROS_DISTRO=${{ matrix.ros_distro }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.REGISTRY }}/${{ env.REGISTRY_IMAGE }}-${{ matrix.ros_distro }}:${{ steps.date.outputs.date }}
           labels: ${{ steps.meta.outputs.labels }}
