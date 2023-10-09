@@ -1,9 +1,10 @@
 name: Publish Docker image to ghcr
 
 on:
+  workflow_dispatch:
+
   push:
     branches: [ ros2 ]
-  workflow_dispatch:
 
   pull_request:
     types: [opened, reopened]
@@ -31,14 +32,13 @@ jobs:
     steps:
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
       - name: Checkout own repository
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        if: matrix.architecture != 'linux/amd64'
-        uses: docker/setup-qemu-action@v3
+      # - name: Set up QEMU
+      #   uses: docker/setup-qemu-action@v3
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -68,4 +68,4 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/arm64,linux/amd64
+          # platforms: linux/arm64,linux/amd64
