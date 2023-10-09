@@ -36,9 +36,11 @@ jobs:
 
       - name: Checkout own repository
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
-      # - name: Set up QEMU
-      #   uses: docker/setup-qemu-action@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -66,6 +68,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.REGISTRY }}/${{ env.REGISTRY_IMAGE }}-${{ matrix.ros_distro }}:${{ steps.date.outputs.date }}
           labels: ${{ steps.meta.outputs.labels }}
-          # cache-from: type=gha
-          # cache-to: type=gha,mode=max
-          # platforms: linux/arm64,linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/arm64,linux/amd64
