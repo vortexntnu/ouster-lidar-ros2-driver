@@ -14,7 +14,8 @@ services:
                 && source ./install/setup.bash \
                 && ros2 launch ouster_ros sensor.launch.xml \
                 sensor_hostname:=os1-122037000366.local \
-                lidar_port:=30011
+                lidar_port:=30011 \
+                viz:=false 
                 ", "ros-entrypoint"]
     ports:
     - 30011:30011
@@ -34,5 +35,6 @@ services:
                 && source ./install/setup.bash \
                 && ros2 launch ouster_ros sensor.launch.xml \
                 sensor_hostname:=os1-12207000043.local \
-                lidar_port:=1001
+                lidar_port:=1001 \
+                viz:=false
                 ", "ros-entrypoint"]

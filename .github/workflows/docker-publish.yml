@@ -66,7 +66,8 @@ jobs:
           build-args: |
             ROS_DISTRO=${{ matrix.ros_distro }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.REGISTRY }}/${{ env.REGISTRY_IMAGE }}-${{ matrix.ros_distro }}:${{ steps.date.outputs.date }}
+          # tags: ${{ env.REGISTRY }}/${{ env.REGISTRY_IMAGE }}-${{ matrix.ros_distro }}:${{ steps.date.outputs.date }}
+          tags: ${{ env.REGISTRY }}/${{ env.REGISTRY_IMAGE }}-${{ matrix.ros_distro }}:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
