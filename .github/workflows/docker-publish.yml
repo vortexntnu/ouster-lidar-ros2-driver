@@ -29,6 +29,10 @@ jobs:
       packages: write
 
     steps:
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
       - name: Checkout own repository
         uses: actions/checkout@v4
 
@@ -58,7 +62,7 @@ jobs:
           context: .
           file: Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.REGISTRY }}/${{ env.REGISTRY_IMAGE }}-${{ matrix.ros_distro }}:$(date +%s)
+          tags: ${{ env.REGISTRY }}/${{ env.REGISTRY_IMAGE }}-${{ matrix.ros_distro }}:${{ steps.date.outputs.date }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
