@@ -1,24 +1,43 @@
-version: "3"
+version: '3.8'
 
 services:
-  ouster-lidar-ros2:
+  freya-lidar:
     container_name: ouster-lidar
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # build: 
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: ghcr.io/vortexntnu/ouster-lidar-ros2-driver-humble:2023-10-09
+
+    # network_mode: host  
+    environment:
+      - DISPLAY = :0
     entrypoint: ["bash", "-c", "set -e \
-                  && source ./install/setup.bash \
-                  && ros2 launch ouster_ros sensor.launch.xml \
-                        --sensor_hostname:=os1-122007000043 \
-                        --lidar_port:=11401 \
-                        --viz:=false \
-                  ", "ros-entrypoint"]
-    tty: true
-    stdin_open: true
-    network_mode: "host"
+                && source ./install/setup.bash \
+                && ros2 launch ouster_ros sensor.launch.xml \
+                  sensor_hostname:=os1-122037000366 \
+                  lidar_port:=30011 \
+                  viz:=false 
+                ", "ros-entrypoint"]
     ports:
-      - 8080:8080   # Web interface
-      - 7501:7501   # sensor port, might not be needed (idfk) doesn't hurt to add...
-      - 11311:11311 # ROS master port
-      - 11401:11401 # Lidar data port
-      - 11402:11402 # IMU data port
+    - 30011:30011 # lidar output port
+    - 80:80       # sensor communicate through http...
+
+  test-lidar:
+    container_name: ouster-lidar-test
+    # build: 
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: ghcr.io/vortexntnu/ouster-lidar-ros2-driver-humble:2023-10-09
+
+    # network_mode: host  
+    ports:
+      - 1001:1001
+    environment:
+      - DISPLAY = :0
+    entrypoint: ["bash", "-c", "set -e \
+                && source ./install/setup.bash \
+                && ros2 launch ouster_ros sensor.launch.xml \
+                  sensor_hostname:=os1-12207000043 \
+                  lidar_port:=1001 \
+                  viz:=false
+                ", "ros-entrypoint"]
