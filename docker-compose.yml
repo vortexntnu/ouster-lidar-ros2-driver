@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+
+  freya-lidar:
+    container_name: ouster-lidar-ros
+    build: 
+      context: .
+      dockerfile: Dockerfile
+     
+    # network_mode: host  
+    environment:
+      - DISPLAY = :0
+    entrypoint: ["bash", "-c", "set -e \
+                && source ./install/setup.bash \
+                && ros2 launch ouster_ros sensor.launch.xml \
+                sensor_hostname:=os1-122037000366.local \
+                lidar_port:=30011 \
+                viz:=false 
+                ", "ros-entrypoint"]
+    ports:
+    - 30011:30011
+
+  test-lidar:
+    container_name: ouster-lidar-ros
+    build: 
+      context: .
+      dockerfile: Dockerfile
+     
+    # network_mode: host  
+    ports:
+      - 1001:1001
+    environment:
+      - DISPLAY = :0
+    entrypoint: ["bash", "-c", "set -e \
+                && source ./install/setup.bash \
+                && ros2 launch ouster_ros sensor.launch.xml \
+                sensor_hostname:=os1-12207000043.local \
+                lidar_port:=1001 \
+                viz:=false
+                ", "ros-entrypoint"]

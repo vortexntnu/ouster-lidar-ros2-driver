@@ -21,7 +21,11 @@
   <depend>pcl_ros</depend>
   <depend>pcl_conversions</depend>
   <depend>std_srvs</depend>
+<<<<<<< HEAD
   <depend>libglfw3-dev</depend> <!-- added, needed -->
+=======
+  <depend>libglfw3-dev</depend>
+>>>>>>> 4dbeb82ab80627c2e6c25486e5c22f3068e5c542
 
   <build_depend>libjsoncpp-dev</build_depend>
   <build_depend>eigen</build_depend>
