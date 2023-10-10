@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+  ouster-lidar-ros2:
+    container_name: ouster-lidar
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: ["bash", "-c", "set -e \
+                  && source ./install/setup.bash \
+                  && ros2 launch ouster_ros sensor.launch.xml \
+                        --sensor_hostname:=os1-122007000043 \
+                        --lidar_port:=11401 \
+                        --viz:=false \
+                  ", "ros-entrypoint"]
+    tty: true
+    stdin_open: true
+    network_mode: "host"
+    ports:
+      - 8080:8080   # Web interface
+      - 7501:7501   # sensor port, might not be needed (idfk) doesn't hurt to add...
+      - 11311:11311 # ROS master port
+      - 11401:11401 # Lidar data port
+      - 11402:11402 # IMU data port
