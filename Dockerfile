@@ -60,7 +60,7 @@ SHELL ["/bin/bash", "-c"]
 RUN source /opt/ros/$ROS_DISTRO/setup.bash  \
     && colcon build                         \
         --symlink-install                   \
-        --executor-sequential               \ 
+        -executor sequential                \ 
         --cmake-args                        \
         -DCMAKE_BUILD_TYPE=Release          \
         -DCMAKE_CXX_FLAGS="-Wno-deprecated-declarations"
