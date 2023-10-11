@@ -3,41 +3,47 @@ version: '3.8'
 services:
   freya-lidar:
     container_name: ouster-lidar
-    # build: 
-    #   context: .
-    #   dockerfile: Dockerfile
-    image: ghcr.io/vortexntnu/ouster-lidar-ros2-driver-humble:2023-10-09
-
-    # network_mode: host  
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    # image: ghcr.io/vortexntnu/ouster-lidar-ros2-driver-humble:2023-10-09
+    network_mode: host  
     environment:
       - DISPLAY = :0
+    
+    # os1-122007000043
     entrypoint: ["bash", "-c", "set -e \
                 && source ./install/setup.bash \
                 && ros2 launch ouster_ros sensor.launch.xml \
-                  sensor_hostname:=os1-122037000366 \
-                  lidar_port:=30011 \
-                  viz:=false 
+                    sensor_hostname:=169.254.154.82 \
+                    lidar_port:=30011 \
+                    viz:=false 
                 ", "ros-entrypoint"]
     ports:
     - 30011:30011 # lidar output port
     - 80:80       # sensor communicate through http...
+    deploy:
+      resources:
+        limits:
+          cpus: "40.0"    # max draw 40% cpu
+          memory: 2000M   # max draw 2gb memory
 
-  test-lidar:
-    container_name: ouster-lidar-test
-    # build: 
-    #   context: .
-    #   dockerfile: Dockerfile
-    image: ghcr.io/vortexntnu/ouster-lidar-ros2-driver-humble:2023-10-09
+  # test-lidar:
+  #   container_name: ouster-lidar-test
+  #   # build: 
+  #   #   context: .
+  #   #   dockerfile: Dockerfile
+  #   image: ghcr.io/vortexntnu/ouster-lidar-ros2-driver-humble:2023-10-09
 
-    # network_mode: host  
-    ports:
-      - 1001:1001
-    environment:
-      - DISPLAY = :0
-    entrypoint: ["bash", "-c", "set -e \
-                && source ./install/setup.bash \
-                && ros2 launch ouster_ros sensor.launch.xml \
-                  sensor_hostname:=os1-12207000043 \
-                  lidar_port:=1001 \
-                  viz:=false
-                ", "ros-entrypoint"]
+  #   # network_mode: host  
+  #   ports:
+  #     - 1001:1001
+  #   environment:
+  #     - DISPLAY = :0
+  #   entrypoint: ["bash", "-c", "set -e \
+  #               && source ./install/setup.bash \
+  #               && ros2 launch ouster_ros sensor.launch.xml \
+  #                 sensor_hostname:=os1-12207000043 \
+  #                 lidar_port:=1001 \
+  #                 viz:=false
+  #               ", "ros-entrypoint"]
