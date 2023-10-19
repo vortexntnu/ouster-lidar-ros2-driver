@@ -3,12 +3,12 @@ name: Publish Docker image to ghcr
 on:
   workflow_dispatch:
 
-  push:
-    branches: [ ros2 ]
+#   push:
+#     branches: [ ros2 ]
 
-  pull_request:
-    types: [opened, reopened]
-    branches: [ ros2 ]
+#   pull_request:
+#     types: [opened, reopened]
+#     branches: [ ros2 ]
 
 env:
   REGISTRY: ghcr.io
