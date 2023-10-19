@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-
   freya-lidar:
     # os1-122007000043
     container_name: ouster-lidar-freya
@@ -11,23 +10,21 @@ services:
     entrypoint: ["bash", "-c", "set -e \
                 && source ./install/setup.bash \
                 && ros2 launch ouster_ros sensor.launch.xml \
-                    sensor_hostname:=169.254.154.82 \
+                    sensor_hostname:=169.254.154.82 \ 
                     lidar_port:=7502 \
                     viz:=false 
                 ", "ros-entrypoint"]
-
-
+                # ^Change to freya static-ip
 
   test-lidar:
-    # os1-122007000043
     container_name: ouster-lidar-test
     image: ghcr.io/vortexntnu/ouster-lidar-ros2-driver-humble:2023-10-09
     ports:
-      - 7502:7502/udp # lidar output port
+      - 7503:7503/udp # lidar output port
     entrypoint: ["bash", "-c", "set -e \
                 && source ./install/setup.bash \
                 && ros2 launch ouster_ros sensor.launch.xml \
                   sensor_hostname:=10.0.0.122 \
-                  lidar_port:=7502 \
+                  lidar_port:=7503 \
                   viz:=false
                 ", "ros-entrypoint"]
