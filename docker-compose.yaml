@@ -1,9 +1,9 @@
 version: '3.8'
 
-services:
+# Lidar hostname: os1-122007000043
 
+services:
   freya-lidar:
-    # os1-122007000043
     container_name: ouster-lidar-freya
     image: ghcr.io/vortexntnu/ouster-lidar-ros2-driver-humble:2023-10-09
     ports:
@@ -18,10 +18,7 @@ services:
                     viz:=false 
                 ", "ros-entrypoint"]
 
-
-
   test-lidar:
-    # os1-122007000043
     container_name: ouster-lidar-test
     image: ghcr.io/vortexntnu/ouster-lidar-ros2-driver-humble:2023-10-09
     ports:
