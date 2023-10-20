@@ -9,14 +9,12 @@ services:
     ports:
       - 7502:7502/udp # lidar output port
       - 7503:7503/udp # imu output port
-    entrypoint: ["bash", "-c", "set -e \
-                && source ./install/setup.bash \
-                && ros2 launch ouster_ros sensor.launch.xml \
-                    sensor_hostname:=169.254.154.82 \ 
-                    lidar_port:=7502 \
-                    imu_port:=7503 \
-                    viz:=false 
-                ", "ros-entrypoint"]
+    command: ["sensor_hostname:=os1-122037000366.local",
+              "lidar_port:=7502",
+              "imu_port:=7503",
+              "viz:=false"]
+    # volumes:
+    #   - /tmp/.X11-unix:/tmp/.X11-unix:rw
 
   test-lidar:
     container_name: ouster-lidar-test
@@ -24,11 +22,10 @@ services:
     ports:
       - 7502:7502/udp # lidar output port
       - 7503:7503/udp # imu output port
-    entrypoint: ["bash", "-c", "set -e \
-                && source ./install/setup.bash \
-                && ros2 launch ouster_ros sensor.launch.xml \
-                  sensor_hostname:=10.0.0.122 \
-                  lidar_port:=7502 \
-                  imu_port:=7503 \
-                  viz:=false
-                ", "ros-entrypoint"]
+    command: ["sensor_hostname:=10.0.0.122",
+              "lidar_port:=7502",
+              "imu_port:=7503",
+              "viz:=false"]
+                
+    # volumes:
+    #   - /tmp/.X11-unix:/tmp/.X11-unix:rw
