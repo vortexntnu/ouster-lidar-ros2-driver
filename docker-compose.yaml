@@ -1,6 +1,6 @@
 version: '3.8'
 
-# Lidar hostname: os1-122007000043
+# lidar hostname: os1-122007000043
 
 services:
   freya-lidar:
@@ -12,7 +12,7 @@ services:
     entrypoint: ["bash", "-c", "set -e \
                 && source ./install/setup.bash \
                 && ros2 launch ouster_ros sensor.launch.xml \
-                    sensor_hostname:=169.254.154.82 \
+                    sensor_hostname:=169.254.154.82 \ 
                     lidar_port:=7502 \
                     imu_port:=7503 \
                     viz:=false 
