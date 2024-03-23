@@ -20,9 +20,9 @@
 #include <std_srvs/srv/empty.hpp>
 #include <lifecycle_msgs/msg/transition.hpp>
 #include <lifecycle_msgs/srv/change_state.hpp>
-#include "ouster_msgs/msg/packet_msg.hpp"
-#include "ouster_msgs/srv/get_config.hpp"
-#include "ouster_msgs/srv/set_config.hpp"
+#include "ouster_sensor_msgs/msg/packet_msg.hpp"
+#include "ouster_sensor_msgs/srv/get_config.hpp"
+#include "ouster_sensor_msgs/srv/set_config.hpp"
 #include "ouster_ros/visibility_control.h"
 #include "ouster_ros/os_sensor_node_base.h"
 
@@ -39,6 +39,7 @@ class OusterSensor : public OusterSensorNodeBase {
     OUSTER_ROS_PUBLIC
     OusterSensor(const std::string& name, const rclcpp::NodeOptions& options);
     explicit OusterSensor(const rclcpp::NodeOptions& options);
+    ~OusterSensor() override;
 
     LifecycleNodeInterface::CallbackReturn on_configure(
         const rclcpp_lifecycle::State& state);
@@ -65,6 +66,8 @@ class OusterSensor : public OusterSensorNodeBase {
     virtual void on_imu_packet_msg(const uint8_t* raw_imu_packet);
 
     virtual void cleanup();
+
+    void halt();
 
    private:
     void declare_parameters();
@@ -145,13 +148,13 @@ class OusterSensor : public OusterSensorNodeBase {
     std::string mtp_dest;
     bool mtp_main;
     std::shared_ptr<sensor::client> sensor_client;
-    ouster_msgs::msg::PacketMsg lidar_packet;
-    ouster_msgs::msg::PacketMsg imu_packet;
-    rclcpp::Publisher<ouster_msgs::msg::PacketMsg>::SharedPtr lidar_packet_pub;
-    rclcpp::Publisher<ouster_msgs::msg::PacketMsg>::SharedPtr imu_packet_pub;
+    ouster_sensor_msgs::msg::PacketMsg lidar_packet;
+    ouster_sensor_msgs::msg::PacketMsg imu_packet;
+    rclcpp::Publisher<ouster_sensor_msgs::msg::PacketMsg>::SharedPtr lidar_packet_pub;
+    rclcpp::Publisher<ouster_sensor_msgs::msg::PacketMsg>::SharedPtr imu_packet_pub;
     rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_srv;
-    rclcpp::Service<ouster_msgs::srv::GetConfig>::SharedPtr get_config_srv;
-    rclcpp::Service<ouster_msgs::srv::SetConfig>::SharedPtr set_config_srv;
+    rclcpp::Service<ouster_sensor_msgs::srv::GetConfig>::SharedPtr get_config_srv;
+    rclcpp::Service<ouster_sensor_msgs::srv::SetConfig>::SharedPtr set_config_srv;
     std::shared_ptr<rclcpp::Client<ChangeState>> change_state_client;
 
     // TODO: implement & utilize a lock-free ring buffer in future
@@ -162,11 +165,9 @@ class OusterSensor : public OusterSensorNodeBase {
     std::unique_ptr<std::thread> sensor_connection_thread;
 
     std::atomic<bool> imu_packets_processing_thread_active = {false};
-    std::atomic<bool> imu_packets_skip;
     std::unique_ptr<std::thread> imu_packets_processing_thread;
 
     std::atomic<bool> lidar_packets_processing_thread_active = {false};
-    std::atomic<bool> lidar_packets_skip;
     std::unique_ptr<std::thread> lidar_packets_processing_thread;
 
     bool force_sensor_reinit = false;

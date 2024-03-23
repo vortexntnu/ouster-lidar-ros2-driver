@@ -16,9 +16,9 @@
 
 #include "os_sensor_node.h"
 
-using ouster_msgs::msg::PacketMsg;
-using ouster_msgs::srv::GetConfig;
-using ouster_msgs::srv::SetConfig;
+using ouster_sensor_msgs::msg::PacketMsg;
+using ouster_sensor_msgs::srv::GetConfig;
+using ouster_sensor_msgs::srv::SetConfig;
 
 using namespace std::chrono_literals;
 using namespace std::string_literals;
@@ -36,20 +36,29 @@ OusterSensor::OusterSensor(const std::string& name,
 OusterSensor::OusterSensor(const rclcpp::NodeOptions& options)
     : OusterSensor("os_sensor", options) {}
 
+OusterSensor::~OusterSensor() {
+    RCLCPP_DEBUG(get_logger(), "OusterSensor::~OusterSensor() called");
+    halt();
+}
+
+void OusterSensor::halt() {
+    stop_packet_processing_threads();
+    stop_sensor_connection_thread();
+}
+
 void OusterSensor::declare_parameters() {
-    declare_parameter<std::string>("sensor_hostname", "");
-    declare_parameter<std::string>("lidar_ip", "");  // community driver param
-    declare_parameter<std::string>("metadata", "");
-    declare_parameter<std::string>("udp_dest", "");
-    declare_parameter<std::string>("computer_ip",
-                                   "");  // community driver param
-    declare_parameter<std::string>("mtp_dest", "");
-    declare_parameter<bool>("mtp_main", false);
-    declare_parameter<int>("lidar_port", 0);
-    declare_parameter<int>("imu_port", 0);
-    declare_parameter<std::string>("lidar_mode", "");
-    declare_parameter<std::string>("timestamp_mode", "");
-    declare_parameter<std::string>("udp_profile_lidar", "");
+    declare_parameter("sensor_hostname", "");
+    declare_parameter("lidar_ip", "");      // community driver param
+    declare_parameter("metadata", "");
+    declare_parameter("udp_dest", "");
+    declare_parameter("computer_ip", "");   // community driver param
+    declare_parameter("mtp_dest", "");
+    declare_parameter("mtp_main", false);
+    declare_parameter("lidar_port", 0);
+    declare_parameter("imu_port", 0);
+    declare_parameter("lidar_mode", "");
+    declare_parameter("timestamp_mode", "");
+    declare_parameter("udp_profile_lidar", "");
     declare_parameter("use_system_default_qos", false);
 }
 
@@ -119,7 +128,7 @@ LifecycleNodeInterface::CallbackReturn OusterSensor::on_cleanup(
     } catch (const std::exception& ex) {
         RCLCPP_ERROR_STREAM(
             get_logger(),
-            "exception thrown durng cleanup, details: " << ex.what());
+            "exception thrown during cleanup, details: " << ex.what());
         return LifecycleNodeInterface::CallbackReturn::ERROR;
     }
 
@@ -146,7 +155,7 @@ LifecycleNodeInterface::CallbackReturn OusterSensor::on_shutdown(
     } catch (const std::exception& ex) {
         RCLCPP_ERROR_STREAM(
             get_logger(),
-            "exception thrown durng cleanup, details: " << ex.what());
+            "exception thrown during cleanup, details: " << ex.what());
         return LifecycleNodeInterface::CallbackReturn::ERROR;
     }
 
@@ -324,7 +333,6 @@ void OusterSensor::reactivate_sensor(bool init_id_reset) {
     reset_last_init_id = init_id_reset;
     active_config.clear();
     cached_metadata.clear();
-    imu_packets_skip = lidar_packets_skip = true;
     auto request_transitions = std::vector<uint8_t>{
         lifecycle_msgs::msg::Transition::TRANSITION_DEACTIVATE,
         lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE};
@@ -399,7 +407,7 @@ std::shared_ptr<sensor::client> OusterSensor::create_sensor_client(
 
     std::shared_ptr<sensor::client> cli;
     if (sensor::in_multicast(udp_dest)) {
-        // use the mtp_init_client to recieve data via multicast
+        // use the mtp_init_client to receive data via multicast
         // if mtp_main is true when sensor will be configured
         cli = sensor::mtp_init_client(hostname, config, mtp_dest, mtp_main);
     } else if (lidar_port != 0 && imu_port != 0) {
@@ -701,7 +709,7 @@ void OusterSensor::handle_lidar_packet(sensor::client& cli,
         if (success) {
             read_lidar_packet_errors = 0;
             if (!is_legacy_lidar_profile(info) && init_id_changed(pf, buffer)) {
-                // TODO: short circut reset if no breaking changes occured?
+                // TODO: short circuit reset if no breaking changes occured?
                 RCLCPP_WARN(get_logger(),
                             "sensor init_id has changed! reactivating..");
                 reactivate_sensor();
@@ -788,25 +796,22 @@ void OusterSensor::stop_sensor_connection_thread() {
 }
 
 void OusterSensor::start_packet_processing_threads() {
-    imu_packets_skip = false;
     imu_packets_processing_thread_active = true;
     imu_packets_processing_thread = std::make_unique<std::thread>([this]() {
-        auto read_packet = [this](const uint8_t* buffer) {
-            if (!imu_packets_skip) on_imu_packet_msg(buffer);
-        };
         while (imu_packets_processing_thread_active) {
-            imu_packets->read(read_packet);
+            imu_packets->read_timeout([this](const uint8_t* buffer) {
+                if (buffer != nullptr) on_imu_packet_msg(buffer);
+            }, 1s);
         }
         RCLCPP_DEBUG(get_logger(), "imu_packets_processing_thread done.");
     });
 
-    lidar_packets_skip = false;
     lidar_packets_processing_thread_active = true;
     lidar_packets_processing_thread = std::make_unique<std::thread>([this]() {
         while (lidar_packets_processing_thread_active) {
-            lidar_packets->read([this](const uint8_t* buffer) {
-                if (!lidar_packets_skip) on_lidar_packet_msg(buffer);
-            });
+            lidar_packets->read_timeout([this](const uint8_t* buffer) {
+                if (buffer != nullptr) on_lidar_packet_msg(buffer);
+            }, 1s);
         }
         RCLCPP_DEBUG(get_logger(), "lidar_packets_processing_thread done.");
     });
